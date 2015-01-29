@@ -26,8 +26,10 @@ Ext.define('CustomApp', {
             columnCfgs: [
                 'FormattedID',
                 'Name',
-                //'ScheduleState',
-                'Owner'
+                'Owner',
+                'PlannedEndDate',
+                'c_TShirtSize ',
+                'Milestones'
             ]
         });
     }
