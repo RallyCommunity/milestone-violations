@@ -3,11 +3,11 @@
 <head>
     <title>hack</title>
 
-    <script type="text/javascript" src="https://rally1.rallydev.com/apps/2.0rc3/sdk.js"></script>
+    <script type="text/javascript" src="https://rally1.rallydev.com/apps/2.0/sdk.js"></script>
 
     <script type="text/javascript">
         Rally.onReady(function () {
-                Ext.define("CustomApp",{extend:"Rally.app.App",componentCls:"app",items:{html:'<a href="https://help.rallydev.com/apps/2.0rc3/doc/">App SDK 2.0rc3 Docs</a>'},launch:function(){}});
+                Ext.define("CustomApp",{extend:"Rally.app.App",componentCls:"app",launch:function(){Ext.create("Rally.data.wsapi.TreeStoreBuilder").build({models:["PortfolioItem/Feature"],autoLoad:!0}).then({success:this._onStoreBuilt,scope:this})},_onStoreBuilt:function(store){console.log(store),this.add({xtype:"rallytreegrid",context:this.getContext(),store:store,columnCfgs:["FormattedID","Name","Owner"]})}});
 
             Rally.launchApp('CustomApp', {
                 name:"hack",

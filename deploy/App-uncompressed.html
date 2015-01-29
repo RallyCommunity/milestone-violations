@@ -3,16 +3,77 @@
 <head>
     <title>hack</title>
 
-    <script type="text/javascript" src="/apps/2.0rc3/sdk.js"></script>
+    <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
 
     <script type="text/javascript">
         Rally.onReady(function () {
                 Ext.define('CustomApp', {
     extend: 'Rally.app.App',
     componentCls: 'app',
-    items:{ html:'<a href="https://help.rallydev.com/apps/2.0rc3/doc/">App SDK 2.0rc3 Docs</a>'},
+//    launch: function() {
+////          this.add({
+////              xtype: 'rallygrid',
+////              columnCfgs: [
+////                  'FormattedID',
+////                  'Name',
+////                  'Owner',
+////                  'Severity',
+////                  'Priority',
+////                  'Milestones'
+////              ],
+////              context: this.getContext(),
+////              enableEditing: true,
+////              showRowActionsColumn: false,
+////              storeConfig: {
+////                  model: 'PortfolioItem',
+////                
+////                  filters: [
+////                  {
+////                    property: 'Milestones.ObjectID',
+////                    value: null
+////                  }]
+////              }
+////          });
+//      
+//      console.log('loading tree');
+//        Ext.create('Rally.data.wsapi.TreeStoreBuilder').build({
+//            models: ['PortfolioItem'],
+//            autoLoad: true,
+//            enableHierarchy: true,
+////            filters: [
+////            {
+////              property: 'Milestones.ObjectID',
+////              value: null
+////            }]
+//              
+//        }).then({
+//            success: this._onStoreBuilt,
+//            scope: this
+//        });
+//    },
     launch: function() {
-        //Write app code here
+        Ext.create('Rally.data.wsapi.TreeStoreBuilder').build({
+            models: ['PortfolioItem/Feature'],
+            autoLoad: true,
+            //enableHierarchy: true
+        }).then({
+            success: this._onStoreBuilt,
+            scope: this
+        });
+    },
+   _onStoreBuilt: function(store) {
+     console.log(store);
+        this.add({
+            xtype: 'rallytreegrid',
+            context: this.getContext(),
+            store: store,
+            columnCfgs: [
+                'FormattedID',
+                'Name',
+                //'ScheduleState',
+                'Owner'
+            ]
+        });
     }
 });
 
