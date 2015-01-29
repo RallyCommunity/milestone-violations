@@ -50,10 +50,9 @@ Ext.define('CustomApp', {
             toggleState: 'grid',
             stateful: false,
             plugins: [
-                'rallygridboardaddnew',
                 {
                     ptype: 'rallygridboardfieldpicker',
-                    headerPosition: 'left',
+                    headerPosition: 'right',
                     modelNames: modelNames,
                     stateful: true,
                     stateId: context.getScopedStateId('milestone-app')
