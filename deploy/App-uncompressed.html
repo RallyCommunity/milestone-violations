@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>hack</title>
+    <title>Milestones</title>
 
     <script type="text/javascript" src="/apps/2.0/sdk.js"></script>
 
@@ -10,76 +10,64 @@
                 Ext.define('CustomApp', {
     extend: 'Rally.app.App',
     componentCls: 'app',
-//    launch: function() {
-////          this.add({
-////              xtype: 'rallygrid',
-////              columnCfgs: [
-////                  'FormattedID',
-////                  'Name',
-////                  'Owner',
-////                  'Severity',
-////                  'Priority',
-////                  'Milestones'
-////              ],
-////              context: this.getContext(),
-////              enableEditing: true,
-////              showRowActionsColumn: false,
-////              storeConfig: {
-////                  model: 'PortfolioItem',
-////                
-////                  filters: [
-////                  {
-////                    property: 'Milestones.ObjectID',
-////                    value: null
-////                  }]
-////              }
-////          });
-//      
-//      console.log('loading tree');
-//        Ext.create('Rally.data.wsapi.TreeStoreBuilder').build({
-//            models: ['PortfolioItem'],
-//            autoLoad: true,
-//            enableHierarchy: true,
-////            filters: [
-////            {
-////              property: 'Milestones.ObjectID',
-////              value: null
-////            }]
-//              
-//        }).then({
-//            success: this._onStoreBuilt,
-//            scope: this
-//        });
-//    },
+
+    
     launch: function() {
+   
+      var self = this;
+      Ext.create('Rally.data.wsapi.Store', {
+        model: 'TypeDefinition',
+        autoLoad:true,
+        filters: [{
+          property: "TypePath",
+          operator: "contains",
+          value: "PortfolioItem/"
+        }],
+    
+        listeners: {
+            load: function(store, data, success) {
+              self.loadPortfolioItems(data[0].data.TypePath);
+            }
+        }
+      });
+    },
+    loadPortfolioItems: function(typePath) {    
+        console.log('loading ' + typePath);
         Ext.create('Rally.data.wsapi.TreeStoreBuilder').build({
-            models: ['PortfolioItem/Feature'],
-            autoLoad: true,
-            //enableHierarchy: true
+            models: [typePath],
+            autoLoad: true,  
+            enableHierarchy: true,
+            context: null,
+            filters: [
+            {
+              property: 'Milestones.ObjectID',
+              value: null
+            }
+           ]
         }).then({
             success: this._onStoreBuilt,
             scope: this
         });
     },
    _onStoreBuilt: function(store) {
-     console.log(store);
         this.add({
             xtype: 'rallytreegrid',
-            context: this.getContext(),
             store: store,
             columnCfgs: [
-                'FormattedID',
                 'Name',
-                //'ScheduleState',
-                'Owner'
+                'Project',
+                'Parent',
+                'Owner',
+                'Milestones'
             ]
         });
-    }
+   }
+  
 });
 
 
             Rally.launchApp('CustomApp', {
-                name:"hack",
+                name:"Milestones",
 	            parentRepos:""
             });
 
