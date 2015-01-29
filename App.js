@@ -2,9 +2,29 @@ Ext.define('CustomApp', {
     extend: 'Rally.app.App',
     componentCls: 'app',
 
+    
     launch: function() {
+      var self = this;
+      Ext.create('Rally.data.wsapi.Store', {
+        model: 'TypeDefinition',
+        autoLoad:true,
+        filters: [{
+          property: "TypePath",
+          operator: "contains",
+          value: "PortfolioItem/"
+        }],
+
+        listeners: {
+            load: function(store, data, success) {
+              self.loadPortfolioItems(data[0].data.TypePath);
+            }
+        }
+      });
+    },
+    loadPortfolioItems: function(typePath) {    
+        console.log('loading ' + typePath);
         Ext.create('Rally.data.wsapi.TreeStoreBuilder').build({
-            models: ['PortfolioItem/Feature'],
+            models: [typePath],
             autoLoad: true,  
             enableHierarchy: false,
             filters: [
@@ -32,5 +52,6 @@ Ext.define('CustomApp', {
                 'Milestones'
             ]
         });
-    }
+   }
+  
 });
