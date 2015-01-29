@@ -36,22 +36,41 @@ Ext.define('CustomApp', {
             }
            ]
         }).then({
-            success: this._onStoreBuilt,
+            success: this._onStoreBuilt.bind(this, typePath),
             scope: this
         });
     },
-   _onStoreBuilt: function(store) {
+    _onStoreBuilt: function(modelName, store) {
+        var modelNames = [modelName],
+            context = this.getContext();
         this.add({
-            xtype: 'rallytreegrid',
-            store: store,
-            columnCfgs: [
-                'Name',
-                'Project',
-                'Parent',
-                'Owner',
-                'Milestones'
-            ]
+            xtype: 'rallygridboard',
+            context: context,
+            modelNames: modelNames,
+            toggleState: 'grid',
+            stateful: false,
+            plugins: [
+                'rallygridboardaddnew',
+                {
+                    ptype: 'rallygridboardfieldpicker',
+                    headerPosition: 'left',
+                    modelNames: modelNames,
+                    stateful: true,
+                    stateId: context.getScopedStateId('milestone-app')
+                }
+            ],
+            gridConfig: {
+                store: store,
+                columnCfgs: [
+                    'Name',
+                    'Project',
+                    'Parent',
+                    'Owner',
+                    'Milestones'
+                ]
+            },
+            height: this.getHeight()
         });
-   }
+    }
   
 });
