@@ -1,4 +1,4 @@
-Ext.define('Milestone', {
+Ext.define('MilestoneApp', {
     extend: 'Rally.app.App',
     componentCls: 'app',
 
