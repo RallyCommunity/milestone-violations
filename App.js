@@ -44,11 +44,11 @@ Ext.define('MilestoneApp', {
       });
     },
     _loadPortfolioItems: function(typePath) {  
+      
         Ext.create('Rally.data.wsapi.TreeStoreBuilder').build({
-            models: [typePath, "milestone"],
-             root: {expanded: true},
+            models: [typePath],
             autoLoad: true,  
-            enableHierarchy: true,
+            enableHierarchy: false,
             context: null,
             filters: [
             {
@@ -73,26 +73,31 @@ Ext.define('MilestoneApp', {
     },
     _onDataReady: function() {
       var self = this;
+      //window.pfstore = this.pfstore;
       _.map(this.pfstore.getTopLevelNodes(), function(record) {
         record.self.addField('DaysLate');
         record.self.addField('Milestone');
         record.self.addField('TargetDate');
 
         var milestone = self._findFirstMilestone(record.get("Milestones"));
+        if(milestone) {
 
-        var plannedEndDate = record.get("PlannedEndDate");
-        var targetDate = milestone.get("TargetDate");
-        var targetDateString = moment(targetDate).format("MM/DD/YYYY");
-        
-        record.set("Milestone", milestone.data.Name);
-        record.set("TargetDate", targetDateString);
-        
-        
-        if( moment(plannedEndDate).diff(moment(targetDate)) > 0) {
-          var daysLate = moment(plannedEndDate).diff(moment(targetDate), 'days') + 1;
-          record.set("DaysLate", daysLate);
-        } else {
-          //record.remove();
+          var plannedEndDate = record.get("PlannedEndDate");
+          var targetDate = milestone.get("TargetDate");
+          var targetDateString = moment(targetDate).format("MM/DD/YYYY");
+
+          record.set("Milestone", milestone.data.Name);
+          record.set("TargetDate", targetDateString);
+
+
+          if( moment(plannedEndDate).diff(moment(targetDate)) > 0) {
+            var daysLate = moment(plannedEndDate).diff(moment(targetDate), 'days') + 1;
+            record.set("DaysLate", daysLate);
+          } else {
+            // record.remove() will flag record as removed and delete on server
+            // when any other change is made. 
+            //pfstore.tree.root.childNodes = _.remove(pfstore.tree.root.childNodes, record);
+          }
         }
         
       });
@@ -110,6 +115,7 @@ Ext.define('MilestoneApp', {
       return _.first(sorted);
     },
     _onStoreBuilt: function(modelName, store) {
+        
         var modelNames = [modelName],
             context = this.getContext();
       
@@ -141,10 +147,6 @@ Ext.define('MilestoneApp', {
                     'Owner',
                     'PlannedEndDate',
                     'Milestones',
-//                    {
-//                      text: 'First Milestone',
-//                      dataIndex: 'Milestone'
-//                    },
                     {
                       text: 'First Target Date',
                       dataIndex: 'TargetDate'
@@ -163,7 +165,9 @@ Ext.define('MilestoneApp', {
                 
             },
             height: this.getHeight()
+          
         });
+      //window.grid = grid;
     }
   
 });
