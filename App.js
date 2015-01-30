@@ -11,7 +11,7 @@ Ext.define('MilestoneApp', {
               autoLoad : true,
               limit : "Infinity",
               model : "Milestone",
-              fetch : ["TargetDate"],
+              fetch : ["Name", "TargetDate"],
               listeners : {
                   scope : this,
                   load : function(store, data) {
@@ -43,9 +43,7 @@ Ext.define('MilestoneApp', {
         }
       });
     },
-    _loadPortfolioItems: function(typePath) {    
-        console.log('loading ' + typePath);
-        
+    _loadPortfolioItems: function(typePath) {  
         Ext.create('Rally.data.wsapi.TreeStoreBuilder').build({
             models: [typePath, "milestone"],
              root: {expanded: true},
@@ -77,20 +75,28 @@ Ext.define('MilestoneApp', {
       var self = this;
       _.map(this.pfstore.getTopLevelNodes(), function(record) {
         record.self.addField('DaysLate');
+        record.self.addField('Milestone');
+        record.self.addField('TargetDate');
 
         var milestone = self._findFirstMilestone(record.get("Milestones"));
 
-        console.log(milestone);
-        //debugger;
-
-
-        record.set('DaysLate', 10);
-//        if(record.data.FormattedID == "F8142") {
-//          record.remove();
-//        }
-//        
+        var plannedEndDate = record.get("PlannedEndDate");
+        var targetDate = milestone.get("TargetDate");
+        var targetDateString = moment(targetDate).format("MM/DD/YYYY")
+        
+        record.set("Milestone", milestone.data.Name);
+        record.set("TargetDate", targetDateString);
+        
+        var daysLate = moment(plannedEndDate).diff(moment(targetDate), 'days') + 1;
+        if(daysLate > 0) {
+          record.set("DaysLate", daysLate);
+        } else {
+          //record.remove();
+        }
+        
       });
     },
+  
     _findFirstMilestone: function(pfmilestones) {
       var refs = _.pluck(pfmilestones._tagsNameArray, "_ref");
       
@@ -107,7 +113,7 @@ Ext.define('MilestoneApp', {
             context = this.getContext();
       
         store.model.addField({name: "Milestone"});
-        store.model.addField({name: "Milestone"});
+        store.model.addField({name: "TargetDate"});
         store.model.addField({name: "DaysLate"});
         var grid = this.add({
             xtype: 'rallygridboard',
@@ -134,6 +140,14 @@ Ext.define('MilestoneApp', {
                     'Owner',
                     'PlannedEndDate',
                     'Milestones',
+//                    {
+//                      text: 'First Milestone',
+//                      dataIndex: 'Milestone'
+//                    },
+                    {
+                      text: 'First Target Date',
+                      dataIndex: 'TargetDate'
+                    },
                     {
                       text: 'Days Late',
                       dataIndex: 'DaysLate'
