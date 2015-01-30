@@ -119,7 +119,8 @@ Ext.define('MilestoneApp', {
       return _.first(sorted);
     },
     _onStoreBuilt: function(modelName, store) {
-        
+        store.sorters.clear();
+      
         var modelNames = [modelName],
             context = this.getContext();
       
