@@ -51,10 +51,6 @@ Ext.define('MilestoneApp', {
             enableHierarchy: false,
             context: null,
             sortOnLoad: false,
-            sorters: [{
-              property: 'Name',
-              direction: 'ASC'
-            }],
             filters: [
             {
               property: 'Milestones.ObjectID',
@@ -64,12 +60,6 @@ Ext.define('MilestoneApp', {
             listeners: {
                 load: this._onDataLoaded,
                 scope: this
-            },
-            getState: function() {
-              return {};
-            },
-            applyState: function() {
-             
             }
         }).then({
             success: this._onStoreBuilt.bind(this, typePath),
@@ -116,6 +106,7 @@ Ext.define('MilestoneApp', {
         }
         
       });
+      this.pfstore.sort({property: "DaysLate", direction: "DESC"});
     },
   
     _findFirstMilestone: function(pfmilestones) {
