@@ -82,13 +82,14 @@ Ext.define('MilestoneApp', {
 
         var plannedEndDate = record.get("PlannedEndDate");
         var targetDate = milestone.get("TargetDate");
-        var targetDateString = moment(targetDate).format("MM/DD/YYYY")
+        var targetDateString = moment(targetDate).format("MM/DD/YYYY");
         
         record.set("Milestone", milestone.data.Name);
         record.set("TargetDate", targetDateString);
         
-        var daysLate = moment(plannedEndDate).diff(moment(targetDate), 'days') + 1;
-        if(daysLate > 0) {
+        
+        if( moment(plannedEndDate).diff(moment(targetDate)) > 0) {
+          var daysLate = moment(plannedEndDate).diff(moment(targetDate), 'days') + 1;
           record.set("DaysLate", daysLate);
         } else {
           //record.remove();
