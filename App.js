@@ -33,17 +33,28 @@ Ext.define('MilestoneApp', {
             {
               property: 'Milestones.ObjectID',
               value: null
+            }],
+            listeners: {
+                load: this._onDataLoaded,
+                scope: this
             }
-           ]
         }).then({
             success: this._onStoreBuilt.bind(this, typePath),
             scope: this
         });
     },
+    _onDataLoaded: function(store, node, data) {
+
+      _.map(data, function(record) {
+          record.self.addField('DaysLate');
+          record.set('DaysLate', 10);
+      });
+    },
     _onStoreBuilt: function(modelName, store) {
         var modelNames = [modelName],
             context = this.getContext();
-        this.add({
+        store.model.addField({name: "DaysLate"});
+        var grid = this.add({
             xtype: 'rallygridboard',
             context: context,
             modelNames: modelNames,
@@ -57,7 +68,6 @@ Ext.define('MilestoneApp', {
                     stateful: true,
                     stateId: context.getScopedStateId('milestone-app')
                 }
-                
             ],
             gridConfig: {
                 store: store,
@@ -67,16 +77,28 @@ Ext.define('MilestoneApp', {
                     'Project',
                     'Parent',
                     'Owner',
-                    'Milestones'
+                    'Milestones',
+                    {
+                      text: 'Days Late',
+                      dataIndex: 'DaysLate'
+                    }
+                    
                 ],
                 plugins: [
                 {
                   ptype: "rallytreegridexpandedrowpersistence", 
                   enableExpandLoadingMask:false
-                }]
+                }], 
+                listeners: {
+                  afterrender: function(grid) {
+                    //debugger;
+                  },
+                  scope: this
+                }
             },
             height: this.getHeight()
         });
+     // debugger;
     }
   
 });
