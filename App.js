@@ -3,9 +3,31 @@ Ext.define('MilestoneApp', {
     componentCls: 'app',
     
     launch: function() {
-   
-      var self = this;
-      Ext.create('Rally.data.wsapi.Store', {
+      this._loadMilestones();
+      this._loadPortfolioItemTypes();
+    },
+   _loadMilestones: function() {
+        Ext.create('Rally.data.WsapiDataStore', {
+              autoLoad : true,
+              limit : "Infinity",
+              model : "Milestone",
+              fetch : ["TargetDate"],
+              listeners : {
+                  scope : this,
+                  load : function(store, data) {
+                      this.milestones = store;
+                      if(this.pfstore) this._onDataReady();
+                  }
+              }
+          });
+    },
+    _loadPortfolioItemTypes: function() {
+      //Usually PortfolioItem/Feature, but the name
+      //could be changed in workspace so we need to 
+      //dynamically determine lowest level
+      
+       var self = this;
+       Ext.create('Rally.data.wsapi.Store', {
         model: 'TypeDefinition',
         autoLoad:true,
         filters: [{
@@ -15,16 +37,17 @@ Ext.define('MilestoneApp', {
         }],
     
         listeners: {
-            load: function(store, data, success) {
-              self.loadPortfolioItems(data[0].data.TypePath);
+            load: function(store, data, success) { 
+              self._loadPortfolioItems(data[0].data.TypePath);
             }
         }
       });
     },
-    loadPortfolioItems: function(typePath) {    
+    _loadPortfolioItems: function(typePath) {    
         console.log('loading ' + typePath);
+        
         Ext.create('Rally.data.wsapi.TreeStoreBuilder').build({
-            models: [typePath],
+            models: [typePath, "milestone"],
              root: {expanded: true},
             autoLoad: true,  
             enableHierarchy: true,
@@ -32,6 +55,7 @@ Ext.define('MilestoneApp', {
             filters: [
             {
               property: 'Milestones.ObjectID',
+              operator: "!=",
               value: null
             }],
             listeners: {
@@ -44,15 +68,46 @@ Ext.define('MilestoneApp', {
         });
     },
     _onDataLoaded: function(store, node, data) {
+      this.pfstore = store;
+      if(this.milestones) this._onDataReady();
+      
+                    
+    },
+    _onDataReady: function() {
+      var self = this;
+      _.map(this.pfstore.getTopLevelNodes(), function(record) {
+        record.self.addField('DaysLate');
 
-      _.map(data, function(record) {
-          record.self.addField('DaysLate');
-          record.set('DaysLate', 10);
+        var milestone = self._findFirstMilestone(record.get("Milestones"));
+
+        console.log(milestone);
+        //debugger;
+
+
+        record.set('DaysLate', 10);
+//        if(record.data.FormattedID == "F8142") {
+//          record.remove();
+//        }
+//        
       });
+    },
+    _findFirstMilestone: function(pfmilestones) {
+      var refs = _.pluck(pfmilestones._tagsNameArray, "_ref");
+      
+      var mdata = _.filter(this.milestones.data.items, function(milestone) { 
+        return _.contains(refs, milestone.data._ref);
+      });
+      var sorted = _.sortBy(mdata, function(milestone) {
+        return milestone.data.TargetDate;
+      });
+      return _.first(sorted);
     },
     _onStoreBuilt: function(modelName, store) {
         var modelNames = [modelName],
             context = this.getContext();
+      
+        store.model.addField({name: "Milestone"});
+        store.model.addField({name: "Milestone"});
         store.model.addField({name: "DaysLate"});
         var grid = this.add({
             xtype: 'rallygridboard',
@@ -77,6 +132,7 @@ Ext.define('MilestoneApp', {
                     'Project',
                     'Parent',
                     'Owner',
+                    'PlannedEndDate',
                     'Milestones',
                     {
                       text: 'Days Late',
@@ -88,17 +144,11 @@ Ext.define('MilestoneApp', {
                 {
                   ptype: "rallytreegridexpandedrowpersistence", 
                   enableExpandLoadingMask:false
-                }], 
-                listeners: {
-                  afterrender: function(grid) {
-                    //debugger;
-                  },
-                  scope: this
-                }
+                }]
+                
             },
             height: this.getHeight()
         });
-     // debugger;
     }
   
 });
