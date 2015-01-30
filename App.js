@@ -128,15 +128,15 @@ Ext.define('MilestoneApp', {
             modelNames: modelNames,
             toggleState: 'grid',
             stateful: false,
-            plugins: [
-                {
-                    ptype: 'rallygridboardfieldpicker',
-                    headerPosition: 'right',
-                    modelNames: modelNames,
-                    stateful: true,
-                    stateId: context.getScopedStateId('milestone-app')
-                }
-            ],
+//            plugins: [
+//                {
+//                    ptype: 'rallygridboardfieldpicker',
+//                    headerPosition: 'right',
+//                    modelNames: modelNames,
+//                    stateful: true,
+//                    stateId: context.getScopedStateId('milestone-app')
+//                }
+//            ],
             gridConfig: {
                 store: store,
                 expandAllInColumnHeaderEnabled: true,
