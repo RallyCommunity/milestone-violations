@@ -84,14 +84,18 @@ Ext.define('MilestoneApp', {
 
           var plannedEndDate = record.get("PlannedEndDate");
           var targetDate = milestone.get("TargetDate");
-          var targetDateString = moment(targetDate).format("MM/DD/YYYY");
-
+          // TODO: Date format can be changed in workspace settings 
+          // should use same format
+          var targetDateString = moment(targetDate).format("YYYY-MM-DD");
+          var plannedEndDateString = moment(plannedEndDate).format("YYYY-MM-DD");
           record.set("Milestone", milestone.data.Name);
           record.set("TargetDate", targetDateString);
 
-
-          if( moment(plannedEndDate).diff(moment(targetDate)) > 0) {
-            var daysLate = moment(plannedEndDate).diff(moment(targetDate), 'days') + 1;
+          var daysLate = moment(plannedEndDate).diff(moment(targetDate), 'days') + 1;
+          //TODO: plannedEndDate is just before midnight and results in 
+          // daysLate 1 if plannedDate and targetDate are the same.  
+          // as workaround just check for that condition explicitly
+          if( daysLate > 0 && plannedEndDateString != targetDateString) {
             record.set("DaysLate", daysLate);
           } else {
             // record.remove() will flag record as removed and delete on server
@@ -122,6 +126,7 @@ Ext.define('MilestoneApp', {
         store.model.addField({name: "Milestone"});
         store.model.addField({name: "TargetDate"});
         store.model.addField({name: "DaysLate"});
+      
         var grid = this.add({
             xtype: 'rallygridboard',
             context: context,
@@ -167,7 +172,7 @@ Ext.define('MilestoneApp', {
             height: this.getHeight()
           
         });
-      //window.grid = grid;
+      window.grid = grid;
     }
   
 });
