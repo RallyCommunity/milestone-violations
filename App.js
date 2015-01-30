@@ -5,6 +5,7 @@ Ext.define('MilestoneApp', {
     launch: function() {
       this._loadMilestones();
       this._loadPortfolioItemTypes();
+      window.mapp = this;
     },
    _loadMilestones: function() {
         Ext.create('Rally.data.WsapiDataStore', {
@@ -35,7 +36,6 @@ Ext.define('MilestoneApp', {
           operator: "contains",
           value: "PortfolioItem/"
         }],
-    
         listeners: {
             load: function(store, data, success) { 
               self._loadPortfolioItems(data[0].data.TypePath);
@@ -50,6 +50,11 @@ Ext.define('MilestoneApp', {
             autoLoad: true,  
             enableHierarchy: false,
             context: null,
+            sortOnLoad: false,
+            sorters: [{
+              property: 'Name',
+              direction: 'ASC'
+            }],
             filters: [
             {
               property: 'Milestones.ObjectID',
@@ -59,6 +64,12 @@ Ext.define('MilestoneApp', {
             listeners: {
                 load: this._onDataLoaded,
                 scope: this
+            },
+            getState: function() {
+              return {};
+            },
+            applyState: function() {
+             
             }
         }).then({
             success: this._onStoreBuilt.bind(this, typePath),
@@ -119,8 +130,7 @@ Ext.define('MilestoneApp', {
       return _.first(sorted);
     },
     _onStoreBuilt: function(modelName, store) {
-        store.sorters.clear();
-      
+     
         var modelNames = [modelName],
             context = this.getContext();
       
@@ -128,7 +138,7 @@ Ext.define('MilestoneApp', {
         store.model.addField({name: "TargetDate"});
         store.model.addField({name: "DaysLate"});
       
-        var grid = this.add({
+        this.gridBoard = this.add({
             xtype: 'rallygridboard',
             context: context,
             modelNames: modelNames,
@@ -167,13 +177,18 @@ Ext.define('MilestoneApp', {
                 {
                   ptype: "rallytreegridexpandedrowpersistence", 
                   enableExpandLoadingMask:false
-                }]
+                }],
+                getState: function() {
+                  return {};
+                },
+                applyState: function() {
+
+                }
                 
             },
             height: this.getHeight()
           
         });
-      window.grid = grid;
     }
   
 });
