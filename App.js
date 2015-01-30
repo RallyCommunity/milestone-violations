@@ -1,7 +1,6 @@
 Ext.define('MilestoneApp', {
     extend: 'Rally.app.App',
     componentCls: 'app',
-
     
     launch: function() {
    
@@ -26,6 +25,7 @@ Ext.define('MilestoneApp', {
         console.log('loading ' + typePath);
         Ext.create('Rally.data.wsapi.TreeStoreBuilder').build({
             models: [typePath],
+             root: {expanded: true},
             autoLoad: true,  
             enableHierarchy: true,
             context: null,
@@ -57,16 +57,23 @@ Ext.define('MilestoneApp', {
                     stateful: true,
                     stateId: context.getScopedStateId('milestone-app')
                 }
+                
             ],
             gridConfig: {
                 store: store,
+                expandAllInColumnHeaderEnabled: true,
                 columnCfgs: [
                     'Name',
                     'Project',
                     'Parent',
                     'Owner',
                     'Milestones'
-                ]
+                ],
+                plugins: [
+                {
+                  ptype: "rallytreegridexpandedrowpersistence", 
+                  enableExpandLoadingMask:false
+                }]
             },
             height: this.getHeight()
         });
